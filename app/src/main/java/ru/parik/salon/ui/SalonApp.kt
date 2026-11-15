@@ -47,15 +47,15 @@ import ru.parik.salon.domain.*
             Box(Modifier.fillMaxSize().padding(padding)) {
                 if (!state.loaded) { CircularProgressIndicator(Modifier.padding(32.dp)) }
                 else NavHost(nav, startDestination = "schedule") {
-                    composable("schedule") { ScheduleScreen(vm, state, { nav.navigate("edit-appointment/new") }, { nav.navigate("appointment/$it") }) }
+                    composable("schedule") { ScheduleScreen(vm, state, { vm.clearCreatedClient(); vm.clearCreatedService(); nav.navigate("edit-appointment/new") }, { nav.navigate("appointment/$it") }) }
                     composable("clients") { ClientsScreen(state, { nav.navigate("edit-client/new") }, { nav.navigate("client/$it") }) }
                     composable("services") { ServicesScreen(state, { nav.navigate("edit-service/$it") }) }
                     composable("settings") { SettingsScreen(vm, state, busy) }
                     composable("edit-client/{id}") { ClientEditor(vm, state, it.arguments?.getString("id").orEmpty(), busy) { nav.popBackStack() } }
-                    composable("client/{id}") { ClientDetails(vm, state, it.arguments?.getString("id").orEmpty(), busy, { nav.popBackStack() }, { id -> nav.navigate("edit-client/$id") }, { id -> vm.clearCreatedClient(); nav.navigate("edit-appointment/new?client=$id") }, { id -> nav.navigate("appointment/$id") }) }
+                    composable("client/{id}") { ClientDetails(vm, state, it.arguments?.getString("id").orEmpty(), busy, { nav.popBackStack() }, { id -> nav.navigate("edit-client/$id") }, { id -> vm.clearCreatedClient(); vm.clearCreatedService(); nav.navigate("edit-appointment/new?client=$id") }, { id -> nav.navigate("appointment/$id") }) }
                     composable("edit-service/{id}") { ServiceEditor(vm, state, it.arguments?.getString("id").orEmpty(), busy) { nav.popBackStack() } }
                     composable("edit-appointment/{id}?client={client}") { AppointmentEditor(vm, state, it.arguments?.getString("id").orEmpty(), it.arguments?.getString("client"), busy, { nav.popBackStack() }, { nav.navigate("edit-client/new") }, { nav.navigate("edit-service/new") }) }
-                    composable("appointment/{id}") { AppointmentDetails(vm, state, it.arguments?.getString("id").orEmpty(), busy, { nav.popBackStack() }, { id -> nav.navigate("edit-appointment/$id") }) }
+                    composable("appointment/{id}") { AppointmentDetails(vm, state, it.arguments?.getString("id").orEmpty(), busy, { nav.popBackStack() }, { id -> vm.clearCreatedClient(); vm.clearCreatedService(); nav.navigate("edit-appointment/$id") }) }
                 }
                 if (busy && route in tabs.map { it.first }) LinearProgressIndicator(Modifier.fillMaxWidth())
             }
