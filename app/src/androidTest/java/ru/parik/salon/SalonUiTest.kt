@@ -36,6 +36,7 @@ class SalonUiTest {
         compose.onNodeWithText("Имя клиента *").performTextInput("Анна")
         compose.onNodeWithText("Телефон").performTextInput("+7 999 123 45 67")
         compose.onNodeWithText("Сохранить").performClick()
+        waitText("Добавить клиента")
         waitText("Анна")
     }
     @Test fun manualClientCanBeFoundByNameAndPhone() {
@@ -123,6 +124,21 @@ class SalonUiTest {
         if (compose.onAllNodesWithText("Сохранить вне графика").fetchSemanticsNodes().isNotEmpty()) compose.onNodeWithText("Сохранить вне графика").performClick()
         waitText("14:00–15:00")
         compose.onNodeWithText("10:00–11:00").assertDoesNotExist()
+    }
+
+    @Test fun creatingCatalogServiceDoesNotReplaceExistingAppointmentService() {
+        seedAppointment()
+        compose.onNodeWithText("Услуги").performClick()
+        compose.onNodeWithText("Добавить услугу").performClick()
+        compose.onNodeWithText("Название услуги *").performTextInput("Другое название")
+        compose.onNodeWithText("Длительность, мин *").performTextInput("30")
+        compose.onNodeWithText("Сохранить").performClick()
+        waitText("Добавить услугу")
+        compose.onNodeWithText("Расписание").performClick()
+        compose.onNodeWithText("Анна").performClick()
+        compose.onNodeWithText("Перенести / изменить").performScrollTo().performClick()
+        compose.onNodeWithText("Женская стрижка").assertExists()
+        compose.onNodeWithText("Другое название").assertDoesNotExist()
     }
 
 }

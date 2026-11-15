@@ -1,12 +1,10 @@
 package ru.parik.salon
 
 import android.content.Context
-import android.os.Bundle
 import android.os.SystemClock
 import androidx.room.Room
 import androidx.room.withTransaction
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
@@ -40,7 +38,8 @@ class PerformanceTest {
             val found = db.dao().allClients().filter { it.name.contains("05000", true) }
             val searchMs = SystemClock.elapsedRealtime() - searchStart
             assertEquals(48, day.size); assertEquals(1, found.size)
-            InstrumentationRegistry.getInstrumentation().sendStatus(0, Bundle().apply { putString("stream", "\nSynthetic dataset 5000/20000: day query=${dayMs}ms; client load+filter=${searchMs}ms\n") })
+            android.util.Log.i("SalonPerformance", "Synthetic dataset 5000/20000: day query=${dayMs}ms; client load+filter=${searchMs}ms")
+            Unit
         } finally { db.close(); context.deleteDatabase(name) }
     }
 }
