@@ -19,7 +19,7 @@
 
 ## Скачать и установить
 
-Готовый [архив APK/AAB проверенной сборки](https://github.com/PANDORA615/parik/actions/runs/43759109269/artifacts/14179123267) доступен для скачивания. Другие сборки можно получить в [GitHub Actions](https://github.com/PANDORA615/parik/actions): откройте успешный запуск **Android**, скачайте артефакт **my-salon-apk-aab**, распакуйте и выберите `app-debug.apk`.
+Готовый установочный APK: **[скачать my-salon-1.0.0.apk](https://github.com/PANDORA615/parik/releases/download/v1.0.0/my-salon-1.0.0.apk)**. AAB и контрольные суммы доступны на [странице релиза v1.0.0](https://github.com/PANDORA615/parik/releases/tag/v1.0.0). Другие сборки можно получить в [GitHub Actions](https://github.com/PANDORA615/parik/actions): откройте успешный запуск **Android**, скачайте артефакт **my-salon-apk-aab**, распакуйте и выберите `app-debug.apk`.
 
 1. Перенесите APK на телефон с Android 8.0 или новее.
 2. Откройте файл. При необходимости разрешите установку из выбранного браузера/файлового менеджера.

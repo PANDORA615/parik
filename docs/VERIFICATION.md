@@ -32,7 +32,7 @@ Android-приложение собрано; запуск Activity и польз
 - `app/build/outputs/apk/release/app-release-unsigned.apk` — около 8,8 МБ, требует подписи.
 - `app/build/outputs/bundle/release/app-release.aab` — около 8,4 МБ.
 
-[Скачать архив APK/AAB из проверенной CI-сборки](https://github.com/PANDORA615/parik/actions/runs/43759109269/artifacts/14179123267). Для установки выбрать `app-debug.apk`. Debug-ключ CI отличается от локального: перед переустановкой для смены подписи экспортируйте данные.
+[Скачать установочный APK из релиза v1.0.0](https://github.com/PANDORA615/parik/releases/download/v1.0.0/my-salon-1.0.0.apk). [AAB и контрольные суммы](https://github.com/PANDORA615/parik/releases/tag/v1.0.0). Файлы перенесены из успешной CI-сборки без пересборки; установочный файл называется `my-salon-1.0.0.apk`. Debug-ключ CI отличается от локального: перед переустановкой для смены подписи экспортируйте данные.
 
 ## Проверка на Android
 
