@@ -1,0 +1,55 @@
+name: Publish verified release
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful Android workflow run
+        required: true
+        default: '43759109269'
+      source_sha:
+        description: Expected tested source commit
+        required: true
+        default: '354874098add5d18b5ea68807b476b1d4e583cc5'
+      tag:
+        description: Existing draft release tag
+        required: true
+        default: v1.0.0
+permissions:
+  actions: read
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERIFIED_RUN: ${{ inputs.run_id }}
+      EXPECTED_SHA: ${{ inputs.source_sha }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Verify successful build provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$VERIFIED_RUN" =~ ^[0-9]+$ ]]
+          test "$(gh api "repos/$GH_REPO/actions/runs/$VERIFIED_RUN" --jq .conclusion)" = success
+          test "$(gh api "repos/$GH_REPO/actions/runs/$VERIFIED_RUN" --jq .head_sha)" = "$EXPECTED_SHA"
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
+      - name: Download verified APK and AAB
+        run: gh run download "$VERIFIED_RUN" --name my-salon-apk-aab --dir verified-build
+      - name: Prepare release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir dist
+          cp verified-build/apk/debug/app-debug.apk dist/my-salon-1.0.0.apk
+          cp verified-build/bundle/release/app-release.aab dist/my-salon-1.0.0-unsigned.aab
+          cd dist
+          sha256sum my-salon-1.0.0.apk my-salon-1.0.0-unsigned.aab > SHA256SUMS.txt
+      - name: Attach assets and publish MVP release
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" dist/my-salon-1.0.0.apk dist/my-salon-1.0.0-unsigned.aab dist/SHA256SUMS.txt --clobber
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease
+          gh release view "$RELEASE_TAG" --json url,assets
