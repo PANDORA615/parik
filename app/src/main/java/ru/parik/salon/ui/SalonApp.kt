@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.*
 import ru.parik.salon.R
 import ru.parik.salon.domain.*
@@ -29,6 +31,7 @@ import ru.parik.salon.domain.*
     val route = entry?.destination?.route.orEmpty()
     val settingsDirty by vm.settingsDirty.collectAsStateWithLifecycle()
     var pendingPath by rememberSaveable { mutableStateOf<String?>(null) }
+    var addClientDialog by rememberSaveable { mutableStateOf(false) }
     fun navigateTab(path: String) { nav.navigate(path) { popUpTo("schedule"); launchSingleTop = true } }
     BackHandler(enabled = route == "settings" && settingsDirty) { pendingPath = "schedule" }
     val dark = when (state.settings.theme) { ThemeMode.SYSTEM -> isSystemInDarkTheme(); ThemeMode.DARK -> true; ThemeMode.LIGHT -> false }
@@ -48,18 +51,39 @@ import ru.parik.salon.domain.*
                 if (!state.loaded) { CircularProgressIndicator(Modifier.padding(32.dp)) }
                 else NavHost(nav, startDestination = "schedule") {
                     composable("schedule") { ScheduleScreen(vm, state, { vm.clearCreatedClient(); vm.clearCreatedService(); nav.navigate("edit-appointment/new") }, { nav.navigate("appointment/$it") }) }
-                    composable("clients") { ClientsScreen(state, { nav.navigate("edit-client/new") }, { nav.navigate("client/$it") }) }
+                    composable("clients") { ClientsScreen(state, { addClientDialog = true }, { nav.navigate("client/$it") }) }
                     composable("services") { ServicesScreen(state, { nav.navigate("edit-service/$it") }) }
                     composable("settings") { SettingsScreen(vm, state, busy) }
-                    composable("edit-client/{id}") { ClientEditor(vm, state, it.arguments?.getString("id").orEmpty(), busy) { nav.popBackStack() } }
+                    composable("edit-client/{id}?fromContacts={fromContacts}", arguments = listOf(navArgument("fromContacts") { type = NavType.BoolType; defaultValue = false })) {
+                        ClientEditor(vm, state, it.arguments?.getString("id").orEmpty(), busy, openContacts = it.arguments?.getBoolean("fromContacts") == true) { nav.popBackStack() }
+                    }
                     composable("client/{id}") { ClientDetails(vm, state, it.arguments?.getString("id").orEmpty(), busy, { nav.popBackStack() }, { id -> nav.navigate("edit-client/$id") }, { id -> vm.clearCreatedClient(); vm.clearCreatedService(); nav.navigate("edit-appointment/new?client=$id") }, { id -> nav.navigate("appointment/$id") }) }
                     composable("edit-service/{id}") { ServiceEditor(vm, state, it.arguments?.getString("id").orEmpty(), busy) { nav.popBackStack() } }
-                    composable("edit-appointment/{id}?client={client}") { AppointmentEditor(vm, state, it.arguments?.getString("id").orEmpty(), it.arguments?.getString("client"), busy, { nav.popBackStack() }, { nav.navigate("edit-client/new") }, { nav.navigate("edit-service/new") }) }
+                    composable("edit-appointment/{id}?client={client}") { AppointmentEditor(vm, state, it.arguments?.getString("id").orEmpty(), it.arguments?.getString("client"), busy, { nav.popBackStack() }, { addClientDialog = true }, { nav.navigate("edit-service/new") }) }
                     composable("appointment/{id}") { AppointmentDetails(vm, state, it.arguments?.getString("id").orEmpty(), busy, { nav.popBackStack() }, { id -> vm.clearCreatedClient(); vm.clearCreatedService(); nav.navigate("edit-appointment/$id") }) }
                 }
                 if (busy && route in tabs.map { it.first }) LinearProgressIndicator(Modifier.fillMaxWidth())
             }
         }
+        if (addClientDialog) AlertDialog(
+            onDismissRequest = { addClientDialog = false },
+            title = { Text(stringResource(R.string.add_client)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.add_client_hint))
+                    Button(onClick = {
+                        addClientDialog = false
+                        nav.navigate("edit-client/new?fromContacts=true")
+                    }, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.from_contacts)) }
+                    OutlinedButton(onClick = {
+                        addClientDialog = false
+                        nav.navigate("edit-client/new")
+                    }, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.client_manual)) }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { addClientDialog = false }) { Text(stringResource(R.string.cancel)) } }
+        )
         pendingPath?.let { path ->
             Confirmation(stringResource(R.string.unsaved_title), stringResource(R.string.unsaved_message), { pendingPath = null }, { pendingPath = null; vm.settingsDirty.value = false; navigateTab(path) }, R.string.discard)
         }

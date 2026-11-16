@@ -5,15 +5,13 @@ on:
       run_id:
         description: Successful Android workflow run
         required: true
-        default: '43759109269'
       source_sha:
         description: Expected tested source commit
         required: true
-        default: '354874098add5d18b5ea68807b476b1d4e583cc5'
       tag:
         description: Existing draft release tag
         required: true
-        default: v1.0.0
+        default: v1.0.1
 permissions:
   actions: read
   contents: write
@@ -32,6 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$VERIFIED_RUN" =~ ^[0-9]+$ ]]
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
           test "$(gh api "repos/$GH_REPO/actions/runs/$VERIFIED_RUN" --jq .conclusion)" = success
           test "$(gh api "repos/$GH_REPO/actions/runs/$VERIFIED_RUN" --jq .head_sha)" = "$EXPECTED_SHA"
           test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
@@ -42,14 +41,16 @@ jobs:
         run: |
           set -euo pipefail
           mkdir dist
-          cp verified-build/apk/debug/app-debug.apk dist/my-salon-1.0.0.apk
-          cp verified-build/bundle/release/app-release.aab dist/my-salon-1.0.0-unsigned.aab
+          version="${RELEASE_TAG#v}"
+          cp verified-build/apk/debug/app-debug.apk "dist/my-salon-$version.apk"
+          cp verified-build/bundle/release/app-release.aab "dist/my-salon-$version-unsigned.aab"
           cd dist
-          sha256sum my-salon-1.0.0.apk my-salon-1.0.0-unsigned.aab > SHA256SUMS.txt
+          sha256sum "my-salon-$version.apk" "my-salon-$version-unsigned.aab" > SHA256SUMS.txt
       - name: Attach assets and publish MVP release
         shell: bash
         run: |
           set -euo pipefail
-          gh release upload "$RELEASE_TAG" dist/my-salon-1.0.0.apk dist/my-salon-1.0.0-unsigned.aab dist/SHA256SUMS.txt --clobber
+          version="${RELEASE_TAG#v}"
+          gh release upload "$RELEASE_TAG" "dist/my-salon-$version.apk" "dist/my-salon-$version-unsigned.aab" dist/SHA256SUMS.txt --clobber
           gh release edit "$RELEASE_TAG" --draft=false --prerelease
           gh release view "$RELEASE_TAG" --json url,assets

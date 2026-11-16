@@ -33,6 +33,7 @@ class SalonUiTest {
     private fun client() {
         compose.onNodeWithText("Клиенты").performClick()
         compose.onNodeWithText("Добавить клиента").performClick()
+        compose.onNodeWithText("Ввести вручную").performClick()
         compose.onNodeWithText("Имя клиента *").performTextInput("Анна")
         compose.onNodeWithText("Телефон").performTextInput("+7 999 123 45 67")
         compose.onNodeWithText("Сохранить").performClick()
@@ -72,6 +73,7 @@ class SalonUiTest {
     @Test fun draftSurvivesActivityRecreation() {
         compose.onNodeWithText("Клиенты").performClick()
         compose.onNodeWithText("Добавить клиента").performClick()
+        compose.onNodeWithText("Ввести вручную").performClick()
         compose.onNodeWithText("Имя клиента *").performTextInput("Мария")
         compose.onNodeWithText("Телефон").performTextInput("123456")
         activity.recreate()

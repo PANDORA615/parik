@@ -14,6 +14,8 @@
     <string name="empty_clients">Добавьте первого клиента</string>
     <string name="empty_services">Добавьте услугу, чтобы начать запись</string>
     <string name="add_client">Добавить клиента</string>
+    <string name="add_client_hint">Выберите контакт из телефонной книги или заполните данные клиента вручную.</string>
+    <string name="client_manual">Ввести вручную</string>
     <string name="add_service">Добавить услугу</string>
     <string name="save">Сохранить</string>
     <string name="cancel">Отмена</string>

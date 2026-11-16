@@ -13,8 +13,8 @@ android {
         applicationId = "ru.parik.salon"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true }
@@ -49,6 +49,7 @@ dependencies {
     androidTestImplementation(libs.compose.test)
     androidTestImplementation(libs.android.junit)
     androidTestImplementation(libs.espresso)
+    androidTestImplementation(libs.espressoIntents)
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(libs.work.testing)
     androidTestImplementation(libs.coroutines.test)

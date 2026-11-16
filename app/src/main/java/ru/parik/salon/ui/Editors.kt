@@ -22,7 +22,7 @@ import ru.parik.salon.platform.ContactReader
 import java.time.*
 import java.util.UUID
 
-@Composable fun ClientEditor(vm: SalonViewModel, state: SalonState, id: String, busy: Boolean, back: () -> Unit) {
+@Composable fun ClientEditor(vm: SalonViewModel, state: SalonState, id: String, busy: Boolean, openContacts: Boolean = false, back: () -> Unit) {
     val original = state.clients.find { it.id == id }
     val clientId = rememberSaveable { if (id == "new") UUID.randomUUID().toString() else id }
     var name by rememberSaveable { mutableStateOf(original?.name.orEmpty()) }
@@ -32,6 +32,7 @@ import java.util.UUID
     var numbers by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
     var choosePhone by rememberSaveable { mutableStateOf(false) }
     var contactBusy by remember { mutableStateOf(false) }
+    var initialContactRequested by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickContact()) { uri ->
@@ -46,6 +47,12 @@ import java.util.UUID
                 contactPreview = true
             } catch (_: Exception) { vm.showError(Problem.IO) }
             finally { contactBusy = false }
+        }
+    }
+    LaunchedEffect(openContacts) {
+        if (openContacts && original == null && !initialContactRequested) {
+            initialContactRequested = true
+            runCatching { picker.launch(null) }.onFailure { vm.showError(Problem.IO) }
         }
     }
     val dirty = name != original?.name.orEmpty() || phone != original?.phone.orEmpty() || notes != original?.notes.orEmpty()
